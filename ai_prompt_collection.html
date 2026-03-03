@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI活用プロンプト集 - コピペ用ツール</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff758c;
+            --primary-light: #ff7eb3;
+            --secondary: #6ee2f5;
+            --bg-color: #fceef5;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --card-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.6;
+        }
+        .shape-1 {
+            top: -10%; left: -10%;
+            width: 300px; height: 300px;
+            background: var(--primary-light);
+        }
+        .shape-2 {
+            bottom: 10%; right: -5%;
+            width: 250px; height: 250px;
+            background: var(--secondary);
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        h1 {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            font-size: 1.35rem;
+            color: #ff5277;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .chapter-section {
+            margin-bottom: 16px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--card-bg);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .chapter-title {
+            padding: 18px 20px;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #4a4a4a;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.6);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chapter-title:active {
+            background: rgba(255,255,255,0.9);
+        }
+
+        .chapter-title .icon {
+            transition: transform 0.3s ease;
+            color: var(--primary);
+            font-size: 1.2rem;
+            display: inline-block;
+        }
+
+        .chapter-section.active .chapter-title .icon {
+            transform: rotate(180deg);
+        }
+
+        .chapter-content {
+            display: none;
+            padding: 15px;
+            background: transparent;
+        }
+
+        .chapter-section.active .chapter-content {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .prompt-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .prompt-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .prompt-header {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .prompt-header::before {
+            content: '✨';
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        .prompt-text {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #444;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary-light);
+            font-family: 'Noto Sans JP', sans-serif;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 117, 140, 0.3);
+            transition: transform 0.1s, box-shadow 0.2s, background 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(255, 117, 140, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            box-shadow: 0 4px 15px rgba(0, 176, 155, 0.3);
+        }
+
+        .copy-icon {
+            margin-right: 8px;
+        }
+
+        /* Toast notification */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: rgba(60, 60, 60, 0.95);
+            color: #fff;
+            text-align: center;
+            border-radius: 30px;
+            padding: 14px 24px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <header>
+        <h1>プロンプトコピペ用Webサイト</h1>
+        <div class="subtitle">「フリーランス1年生ですが、AIで月収＋10万円アップする方法を教えてください！」<br>漫画プロンプト例まとめ（2〜10章）</div>
+    </header>
+
+    <div class="container" id="content-container">
+        <!-- コンテンツはJavaScriptで生成 -->
+    </div>
+
+    <div id="toast">✅ コピーしました！</div>
+
+    <script>
+        const promptsData = [
+            {
+                chapter: "第2章｜AI基本操作・プロンプト入門",
+                items: [
+                    { title: "タスク整理", text: "今日の仕事のタスクを整理したいです。\n以下のリストを、緊急度と重要度で分類してください。\n（タスクを箇条書きで記入）" },
+                    { title: "一問一答形式（情報聞き出し）", text: "明日の仕事のタスクを整理したいです。\n必要な情報を私に一つずつ質問をして進めてください。" },
+                    { title: "AI活用マネタイズ相談", text: "私は現在○○（自身の業種）として活動しています。\nAIツール（ChatGPTなど）を活用して月収プラス10万円を目指したいです。\n私が答えやすいように、\n一つずつ質問を投げかけながら必要な情報を聞き出し、\n最後に私に合った具体的なアイディアを◯個提案してください。\n質問は初心者でもわかる言葉で、順番に一つずつお願いします。" }
+                ]
+            },
+            {
+                chapter: "第3章｜画像生成・画像編集",
+                items: [
+                    { title: "テキスト入り画像生成", text: "このイラストに「THANK YOU！」の文字を入れてください。" },
+                    { title: "背景透過（人物）", text: "背景と人物を分けて生成してください。\n人物は背景を透過してください。" },
+                    { title: "写真の線画化", text: "この写真の背景を白黒の線画にしてください。" },
+                    { title: "イラスト背景透過", text: "このイラストの背景を透過してください。" }
+                ]
+            },
+            {
+                chapter: "第4章｜漫画制作アシスタント活用",
+                items: [
+                    { title: "役割付与", text: "あなたは優秀な◯◯です。漫画制作を手伝ってください。" },
+                    { title: "専門家設定", text: "◯◯の専門家として質問に答えてください。" },
+                    { title: "用語解説", text: "次の横文字を全部、小学生にもわかるくらい優しく説明して。" },
+                    { title: "シナリオ作成", text: "これから喋る内容から、漫画用のシナリオ作るのを手伝ってください。\n全◯ページ構成、1ページあたり◯コマで作成してください。" },
+                    { title: "セリフ言い換え", text: "このセリフをもう少し短くしたいです。\n言い換えアイデアを30個ください。" },
+                    { title: "背景生成", text: "1枚目に添付のイラストにテイストを合わせて、背景画像を描き直してください。" }
+                ]
+            },
+            {
+                chapter: "第6章｜デザイン制作",
+                items: [
+                    { title: "サムネイル生成", text: "サムネイルデザインの画像を作ってください。\n以下の条件をもとに生成してください。\n用途：YouTubeのサムネイル\n文字：大きく「在宅ワークで月3万円！」と入れる\nターゲット：子育て中の30代ママ向け\n雰囲気：明るくポップで親しみやすい印象\n色合い：ピンクと水色を基調\n要素：女性がノートPCで作業しているイラスト、横に赤ちゃん\n禁止要素：暗い背景や無表情な人物は避ける" },
+                    { title: "画像部分修正", text: "イラストの部分だけ消して、色合いをもう少しパステルカラーに変更して。" },
+                    { title: "ポスター生成（Canva）", text: "ポスターデザインの画像を作ってください。\n以下の条件をもとに生成してください。\n用途：子育てママ向けAIワークショップのポスター\n文字：\n・ママのための初めてのAI活用ワークショップ\n・お子様づれOK・おみやげあり\n・９月４日（水）10:00〜 里山市青空町公民館第一会議室\n・お申し込みはQR\nターゲット：子育て中の30代ママ向け\n雰囲気：パステルカラー\nフォント：丸ゴシック\n色合い：ベビーピンク・ベビーブルー\n要素：赤ちゃんを抱っこするママ\n禁止要素：暗い背景や無表情な人物は避ける" },
+                    { title: "デザイン改善フィードバック", text: "このデザインを見て、改善できそうなポイントを具体的に提案してください。" },
+                    { title: "配色提案", text: "〇〇（用途）で使うデザインを作りたいです。\n雰囲気は△△な感じにしたいです。\nそれに合う配色の組み合わせを、カラーコード（16進数）付きで提案してください。\n背景色・アクセントカラー・テキストカラーなど、具体的な用途別に教えてください。" },
+                    { title: "フォント提案", text: "日本語のデザインで使えるおすすめのフォントを教えてください。\n用途は〇〇で、雰囲気は△△です。\nフリーフォントの中で、商用利用可能なものを中心に提案してください。" }
+                ]
+            },
+            {
+                chapter: "第7章｜ライティング活用",
+                items: [
+                    { title: "文章生成の基本プロンプト", text: "〇〇向けに△△というテーマで\n〜〜な雰囲気(口調)の文体で⬜︎⬜︎を目的とした文章を書いてください。" },
+                    { title: "構成作成", text: "このメモをもとに、初心者向けにわかりやすい記事構成（導入→本文→まとめ）を提案してください。" },
+                    { title: "本文執筆", text: "この構成にそって、親しみやすい語り口調で本文を執筆してください。" },
+                    { title: "文体寄せ", text: "この文章を、添付の文体に寄せて書き直してください。\n内容は変えず、語り口だけ寄せてください。" },
+                    { title: "タイトル案", text: "この記事に合う魅力的なブログタイトルを5案ください。" },
+                    { title: "音声入力→記事制作", text: "この音声入力の内容を〇〇向けに△△というテーマで〜〜な雰囲気の文体で⬜︎⬜︎を目的とした文章を書いてください。" }
+                ]
+            },
+            {
+                chapter: "第8章｜ビジネススキル補助",
+                items: [
+                    { title: "メール添削", text: "このメール内容をビジネス向きに添削してください。" },
+                    { title: "メール作成", text: "次のメモの内容を、依頼クライアント向けに丁寧なメール文にしてください。" },
+                    { title: "営業メール", text: "子育てママ向けメディアに営業メールを送りたいです。\n以下の情報を元に文章を作成してください。\n(送りたい企業の特徴・事業内容などを添付)" },
+                    { title: "営業先リスト", text: "イラストや漫画を制作させてもらえる企業を探すためにメール営業を行いたいです。\nポートフォリオを参照し、合いそうな企業を◯社リスト化してください。" },
+                    { title: "契約書要約", text: "契約書内の内容を初心者でもわかるようにやさしく要約してください。(内容を添付)" },
+                    { title: "見積計算", text: "添付した見積書の小計・消費税・合計を計算してください。" },
+                    { title: "PDF見積書作成", text: "日本の一般的なビジネス文書形式で「見積書(PDF)」を作成してください。\n\nレイアウトは横書きで、タイトルを中央上部\n右上に発行日、左上に宛名・件名・発行者を配置してください。\n\n中央にお見積もり明細表(品名・数量・単価・金額)\n下部に小計・消費税・合計を入れ\n最下部に納期・支払条件・有効期限を備考欄としてまとめてください。\n\nフォントは明朝体(Heisei-W3)を使用し\n全体を整った帳票デザインで仕上げてください。\n\n以下の内容を記載してください。\n発行日/件名/インボイス登録番号/御中\n発行者明細/小計消費税/合計金額(税込)/備考" },
+                    { title: "履歴書インタビュー", text: "履歴書作成のため、経歴をインタビュー形式で整理してください。" },
+                    { title: "自己PR作成", text: "履歴書に書ける自己PR文を一緒に作成してください。" }
+                ]
+            },
+            {
+                chapter: "第9章｜SNS運用",
+                items: [
+                    { title: "アカウント設計", text: "(自己紹介を音声入力)\n話した内容をもとに私のSNS発信のアカウント設計を提案してください。\n私の強みや人柄を踏まえて\nどんなテーマ/どんな人に向けて/どんな雰囲気で発信すると良いかを教えてください。\nまた、そのアカウント設計を元にSNSのプロフィール文章も提案してください。" },
+                    { title: "投稿ネタ", text: "このアカウント設計に沿って、SNSで発信できる投稿ネタを10個提案してください。" },
+                    { title: "1ヶ月テーマ", text: "週3投稿ペースでInstagramに投稿したいです。1ヶ月テーマを作ってください。" },
+                    { title: "フィード投稿作成", text: "音声文字起こしをもとに、Instagramのフィード投稿用のテキストを10枚構成で作ってください。\n各投稿の内容は「見出し」「本文」「セリフ」でまとめてExcelファイルで表形式で出力してください。\n\n見出し｜本文｜セリフ\n(この形式で10行分)\n音声文字起こし:(ここに文字起こしを貼りつけ)" },
+                    { title: "キャプション作成", text: "(フィード画像を貼り付け)\nこのフィード投稿に合うInstagramキャプションを作成してください。リード文/本文/問いかけ/ハッシュタグを自然な流れでまとめてください。" },
+                    { title: "アカウントのメインカラーやフォント提案", text: "アカウント設計に合ったデザインのメインカラーとフォントを提案してください。" },
+                    { title: "X用リライト", text: "このInstagramキャプションをX向けの投稿文に直して。140文字以内でテンポよく、共感を得やすい内容にして。" },
+                    { title: "投稿分析", text: "(投稿した画像とインサイトのスクショを画像添付)\n添付した画像は私のInstagram投稿とそのインサイトです。リーチ数・保存数・いいね数・コメント数の傾向を読み取り、この投稿が伸びた(伸びなかった)理由を分析してください。" }
+                ]
+            },
+            {
+                chapter: "第10章｜コンテンツ販売",
+                items: [
+                    { title: "コンテンツ販売プラットフォーム提案", text: "私の得意分野は〇〇です。\nこの分野の知識やスキルを活かしてデジタルコンテンツを作りたいです。想定するターゲットは〇〇です。\nターゲットに興味を持ってもらえそうなデジタルコンテンツのアイデアとそれらを販売できそうなプラットフォームを提案してください。" },
+                    { title: "Kindle装丁デザイン", text: "〇〇というタイトルでKindleの装丁デザインを作成してください。" },
+                    { title: "有料noteネタ整理", text: "有料noteに活かせる経験を質問形式で掘り下げてください。" },
+                    { title: "LINEスタンプ", text: "LINEスタンプ用のキャラクターイラスト制作を手伝ってください。" },
+                    { title: "Udemy", text: "・〇〇をテーマにしたUdemy講座を作ります。5章立てで構成を提案して。\n・構成をもとに台本を作成して。" },
+                    { title: "価格決め", text: "コンテンツの販売価格を決めたいので、あなたはプロのマーケターとして一つずつ質問してください。\n私が答えた内容をもとに次に考えるべきことを案内して最適な価格を提案してください。" },
+                    { title: "販売戦略", text: "決定した価格を元に、次は売り上げ目標を達成するための販売戦略を立ててください。\n売り上げ目標は〇〇円です。必要な情報を一つずつ質問しながら進めてください。" }
+                ]
+            }
+        ];
+
+        // SVG Icons
+        const copyIcon = `<svg class="copy-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        const checkIcon = `<svg class="copy-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+        // HTML生成処理
+        const container = document.getElementById('content-container');
+        
+        promptsData.forEach((chapterData, cIndex) => {
+            // 第2章をはじめから開いておく
+            const isActive = cIndex === 0 ? 'active' : '';
+            
+            let itemsHtml = '';
+            chapterData.items.forEach((item, iIndex) => {
+                const textId = `prompt-${cIndex}-${iIndex}`;
+                // テキストのサニタイズ（念のため）
+                const safeText = item.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                
+                itemsHtml += `
+                    <div class="prompt-card">
+                        <div class="prompt-header">${item.title}</div>
+                        <div class="prompt-text" id="${textId}">${safeText}</div>
+                        <button class="copy-btn" onclick="copyPrompt('${textId}', this)">
+                            ${copyIcon} プロンプトをコピー
+                        </button>
+                    </div>
+                `;
+            });
+
+            const chapterHtml = `
+                <div class="chapter-section ${isActive}">
+                    <div class="chapter-title" onclick="toggleChapter(this)">
+                        ${chapterData.chapter}
+                        <span class="icon">▼</span>
+                    </div>
+                    <div class="chapter-content">
+                        ${itemsHtml}
+                    </div>
+                </div>
+            `;
+            container.innerHTML += chapterHtml;
+        });
+
+        // アコーディオンの開閉
+        function toggleChapter(element) {
+            const section = element.parentElement;
+            section.classList.toggle('active');
+        }
+
+        // コピー機能
+        function copyPrompt(textId, btnElement) {
+            const textToCopy = document.getElementById(textId).innerText;
+            
+            // クリップボードにコピー
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // ボタンの見た目を変更
+                const originalHtml = `${copyIcon} プロンプトをコピー`;
+                const copiedHtml = `${checkIcon} コピーしました！`;
+                
+                btnElement.classList.add('copied');
+                btnElement.innerHTML = copiedHtml;
+                
+                // トーストへの通知
+                showToast();
+
+                // 2秒後に元に戻す
+                setTimeout(() => {
+                    btnElement.classList.remove('copied');
+                    btnElement.innerHTML = originalHtml;
+                }, 2000);
+            }).catch(err => {
+                console.error('コピーに失敗しました', err);
+                alert('コピーに失敗しました。');
+            });
+        }
+
+        let toastTimeout;
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
